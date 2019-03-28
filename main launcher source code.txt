@@ -1,0 +1,100 @@
+package launcher;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import javax.swing.*;
+public class MainLauncher {
+	public static List<String> getVersionDirectories(){
+		List<String> result = new ArrayList<>();
+		Pattern pattern = Pattern.compile("\\{.*?\"name\": \"(.*?)"\".*?\"type\": "(.*?)\".*?\\}"");
+	}
+public static void main(String[] args) {
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	Dimension windowSize = new Dimension(600, 700);
+	LauncherWindow panel = new LauncherWindow(screenSize, windowSize);
+	JFrame frame = new JFrame("missile launcher");
+	frame.getContentPane().add(panel);
+	frame.setVisible(true);
+	frame.pack();
+	panel.setBackground(Color.BLACK);
+	frame.setFocusable(true);
+	FlowLayout layout = new FlowLayout();
+	JButton play = new JButton("play");
+	play.setBackground(Color.YELLOW);
+	play.setLayout(layout);
+	play.setFocusable(true);
+	play.setVisible(true);
+	panel.add(play);
+	JComboBox<String> version = new JComboBox<String>();
+	try {
+		for(String s : getVersions()) {
+		version.addItem(s);
+		}
+	}catch(Exception e) {
+		
+	}
+	version.setBackground(Color.BLUE);
+	version.setFocusable(true);
+	version.setVisible(true);
+	panel.add(version);
+	play.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+		Versions.launch(version.getItemAt(version.getSelectedIndex()));
+			System.exit(0);
+			}catch(Exception e1) {
+				System.exit(-1);
+			}
+		}
+	});
+	frame.setExtendedState(frame.getExtendedState()|JFrame.MAXIMIZED_BOTH);
+	System.out.println(downloadVersionList("").toString());
+}
+
+static List<String> downloadVersionList(String versionName) {
+	final String LIST_VERSIONS_URL = "https://api.github.com/repos/Jett59/totallyAccurateExplosionSimulator/contents/" + versionName;
+	try {
+		List<String> versions = new ArrayList<>();
+		URL url = new URL(LIST_VERSIONS_URL);
+		InputStream dataStream = url.openStream();
+		try {
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ((nRead = dataStream.read(data, 0, data.length)) != -1) {
+			  buffer.write(data, 0, nRead);
+			}
+			byte[] finalData = buffer.toByteArray();
+			String finalDataString = new String(finalData, Charset.forName("utf-8"));
+			System.out.println(finalDataString);
+		} finally {
+			dataStream.close();
+		}
+		return versions;
+	} catch (Exception e) {
+		e.printStackTrace();
+		throw new RuntimeException("Failed downloading list of versions.");
+	}
+}
+public static List<String> getVersions() throws Exception {
+	List<String> result = Files.readAllLines(Paths.get("version_list.txt"));
+	return result;
+}
+}
