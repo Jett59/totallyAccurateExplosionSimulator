@@ -18,10 +18,20 @@ import java.util.regex.Pattern;
 
 import javax.swing.*;
 public class MainLauncher {
-	public static List<String> getVersionDirectories(){
-		List<String> result = new ArrayList<>();
-		Pattern pattern = Pattern.compile("\\{.*?\"name\": \"(.*?)"\".*?\"type\": "(.*?)\".*?\\}"");
-	}
+    public static List<String> getVersionDirectories(String githubContents){
+        List<String> result = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\\{.*?\"name\": \"(.*?)\".*?\"type\": \"(.*?)\".*?\\}", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(githubContents);
+
+        while (matcher.find()) {
+            String name = matcher.group(1);
+            String type = matcher.group(2);
+            if (type.equals("dir")) {
+                result.add(name);
+            }
+        }
+        return result;
+    }
 public static void main(String[] args) {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	Dimension windowSize = new Dimension(600, 700);
