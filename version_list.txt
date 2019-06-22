@@ -1,1 +1,1 @@
-l atestRelease
+latestRelease
